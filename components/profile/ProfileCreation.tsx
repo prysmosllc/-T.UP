@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { Role } from '@prisma/client'
 import { motion } from 'framer-motion'
+import { FounderProfileData, InvestorProfileData } from '@/lib/types'
 import { FounderProfileForm } from './FounderProfileForm'
 import { InvestorProfileForm } from './InvestorProfileForm'
 
@@ -17,6 +18,62 @@ export function ProfileCreation({ userId, experienceId, role }: ProfileCreationP
 
   const handleBack = () => {
     router.push(`/experiences/${experienceId}/onboarding`)
+  }
+
+  const handleProfileSubmit = async (data: FounderProfileData | InvestorProfileData, isDraft = false) => {
+    try {
+      // Upload pitch deck if provided
+      let pitchDeckUrl = undefined
+      if ('pitchDeckUrl' in data && data.pitchDeckUrl && typeof data.pitchDeckUrl === 'object') {
+        const formData = new FormData()
+        formData.append('file', data.pitchDeckUrl as File)
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json()
+          pitchDeckUrl = uploadResult.data?.url
+        }
+      }
+
+      // Create the profile
+      const profileData = {
+        ...data,
+        pitchDeckUrl,
+        isComplete: !isDraft
+      }
+
+      const response = await fetch('/api/profile/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          experienceId,
+          data: profileData,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save profile')
+      }
+
+      // Navigate to success page or discovery
+      if (isDraft) {
+        // Stay on the same page for draft saves
+        return
+      } else {
+        // Profile completed, redirect to discovery/discovery page
+        router.push(`/experiences/${experienceId}/discovery`)
+      }
+    } catch (error) {
+      console.error('Profile submission error:', error)
+      throw error // Re-throw so the form can handle the error
+    }
   }
 
   const isFounder = role === Role.FOUNDER
@@ -224,9 +281,9 @@ export function ProfileCreation({ userId, experienceId, role }: ProfileCreationP
 
               {/* Form Content */}
               {isFounder ? (
-                <FounderProfileForm userId={userId} experienceId={experienceId} />
+                <FounderProfileForm userId={userId} experienceId={experienceId} onSubmit={handleProfileSubmit} />
               ) : (
-                <InvestorProfileForm userId={userId} experienceId={experienceId} />
+                <InvestorProfileForm userId={userId} experienceId={experienceId} onSubmit={handleProfileSubmit} />
               )}
             </div>
           </motion.div>
