@@ -29,6 +29,7 @@ type InvestorFormData = z.infer<typeof investorSchema>
 interface InvestorProfileFormProps {
   userId: string
   experienceId: string
+  onSubmit: (data: InvestorProfileData, isDraft?: boolean) => void
 }
 
 const sectors = [
@@ -45,7 +46,7 @@ const geographies = [
   'North America', 'Europe', 'Asia Pacific', 'Latin America', 'Middle East', 'Africa', 'Global'
 ]
 
-export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFormProps) {
+export function InvestorProfileForm({ userId, experienceId, onSubmit }: InvestorProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
@@ -79,56 +80,34 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
     setValue(field, newValues, { shouldValidate: true })
   }
 
-  const onSubmit = async (data: InvestorFormData, saveAsDraft = false) => {
-    setIsLoading(true)
-    setIsDraft(saveAsDraft)
-
+  const handleFormSubmit = async (data: InvestorFormData, saveAsDraft = false) => {
     try {
-      const response = await fetch('/api/profile/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          experienceId,
-          role: 'INVESTOR',
-          data: {
-            ...data,
-            checkSize: {
-              min: data.checkSizeMin,
-              max: data.checkSizeMax
-            },
-            portfolioLinks: data.portfolioLinks ? data.portfolioLinks.split('\n').filter(link => link.trim()) : []
-          },
-          isComplete: !saveAsDraft
-        }),
-      })
+      setIsLoading(true)
 
-      if (response.ok) {
-        if (saveAsDraft) {
-          toast.success('Profile saved as draft!')
-        } else {
-          toast.success('Profile created successfully!')
-          setTimeout(() => {
-            router.push(`/experiences/${experienceId}/discovery`)
-          }, 1000)
-        }
-      } else {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to save profile')
+      const profileData: InvestorProfileData = {
+        sectors: data.sectors,
+        checkSize: {
+          min: data.checkSizeMin,
+          max: data.checkSizeMax
+        },
+        stages: data.stages,
+        geography: data.geography,
+        introNote: data.introNote,
+        portfolioLinks: data.portfolioLinks ? data.portfolioLinks.split('\n').filter(link => link.trim()) : [],
+        theses: data.theses
       }
+
+      await onSubmit(profileData, saveAsDraft)
     } catch (error) {
-      console.error('Error saving profile:', error)
-      toast.error(error instanceof Error ? error.message : 'Error saving profile. Please try again.')
+      console.error('Profile submission error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to save profile')
     } finally {
       setIsLoading(false)
-      setIsDraft(false)
     }
   }
 
   const handleSaveDraft = () => {
-    handleSubmit((data) => onSubmit(data, true))()
+    handleSubmit((data) => handleFormSubmit(data, true))()
   }
 
   const handlePreview = () => {
@@ -142,7 +121,7 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
 
   return (
     <>
-      <form onSubmit={handleSubmit((data) => onSubmit(data, false))} className="p-8">
+      <form onSubmit={handleSubmit((data) => handleFormSubmit(data, false))} className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column */}
         <div className="space-y-6">

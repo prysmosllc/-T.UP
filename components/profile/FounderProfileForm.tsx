@@ -32,6 +32,7 @@ type FounderFormData = z.infer<typeof founderSchema>
 interface FounderProfileFormProps {
   userId: string
   experienceId: string
+  onSubmit: (data: FounderProfileData, isDraft?: boolean) => void
 }
 
 const industries = [
@@ -46,7 +47,7 @@ const stages = [
   { value: 'pmf', label: 'Product-Market Fit', description: 'Proven market demand' }
 ]
 
-export function FounderProfileForm({ userId, experienceId }: FounderProfileFormProps) {
+export function FounderProfileForm({ userId, experienceId, onSubmit }: FounderProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
   const [pitchDeckUrl, setPitchDeckUrl] = useState<string>('')
@@ -69,58 +70,37 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
 
   const watchedValues = watch()
 
-  const onSubmit = async (data: FounderFormData, saveAsDraft = false) => {
-    setIsLoading(true)
-    setIsDraft(saveAsDraft)
-
+  const handleFormSubmit = async (data: FounderFormData, saveAsDraft = false) => {
     try {
-      const response = await fetch('/api/profile/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          experienceId,
-          role: 'FOUNDER',
-          data: {
-            ...data,
-            fundingAsk: {
-              min: data.fundingAskMin,
-              max: data.fundingAskMax
-            },
-            pitchDeckUrl: pitchDeckUrl || undefined
-          },
-          isComplete: !saveAsDraft
-        }),
-      })
+      setIsLoading(true)
 
-      if (response.ok) {
-        if (saveAsDraft) {
-          // Show success message for draft
-          toast.success('Profile saved as draft!')
-        } else {
-          // Navigate to discovery
-          toast.success('Profile created successfully!')
-          setTimeout(() => {
-            router.push(`/experiences/${experienceId}/discovery`)
-          }, 1000)
-        }
-      } else {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to save profile')
+      const profileData: FounderProfileData = {
+        startupName: data.startupName,
+        industry: data.industry,
+        stage: data.stage,
+        briefPitch: data.briefPitch,
+        website: data.website,
+        location: data.location,
+        fundingAsk: {
+          min: data.fundingAskMin,
+          max: data.fundingAskMax
+        },
+        teamSize: data.teamSize,
+        tractionMetrics: data.tractionMetrics,
+        pitchDeckUrl: pitchDeckUrl || undefined
       }
+
+      await onSubmit(profileData, saveAsDraft)
     } catch (error) {
-      console.error('Error saving profile:', error)
-      toast.error(error instanceof Error ? error.message : 'Error saving profile. Please try again.')
+      console.error('Profile submission error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to save profile')
     } finally {
       setIsLoading(false)
-      setIsDraft(false)
     }
   }
 
   const handleSaveDraft = () => {
-    handleSubmit((data) => onSubmit(data, true))()
+    handleSubmit((data) => handleFormSubmit(data, true))()
   }
 
   const handleFileUpload = async (file: File): Promise<string> => {
@@ -159,7 +139,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
 
   return (
     <>
-      <form onSubmit={handleSubmit((data) => onSubmit(data, false))} className="p-8">
+      <form onSubmit={handleSubmit((data) => handleFormSubmit(data, false))} className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column */}
         <div className="space-y-6">
