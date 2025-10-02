@@ -67,12 +67,11 @@ model Match {
 
 model Thread {
   id            String   @id @default(cuid())
-  matchId       String   @unique @map("match_id")
   createdAt     DateTime @default(now()) @map("created_at")
   lastMessageAt DateTime @default(now()) @map("last_message_at")
 
   // Relations
-  match    Match     @relation(fields: [matchId], references: [id])
+  match    Match     @relation
   messages Message[]
 
   @@map("threads")
