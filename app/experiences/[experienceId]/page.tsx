@@ -63,7 +63,7 @@ export default async function ExperiencePage({
 					<div className="bg-white rounded-lg shadow-lg p-8 border border-medium-grey/20">
 						<h1 className="text-2xl font-poppins font-bold text-stellar mb-4">Welcome to ⭐ T.UP</h1>
 						<p className="text-dark-grey font-inter mb-6">Let's get you set up with a profile to start matching!</p>
-						<a 
+						<a
 							href={`/experiences/${experienceId}/onboarding`}
 							className="inline-block bg-teal hover:bg-teal/90 text-white font-inter font-bold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
 						>
@@ -88,7 +88,7 @@ export default async function ExperiencePage({
 				<p className="text-lg text-dark-grey mb-8 font-inter">
 					Connect founders with investors through intelligent matching
 				</p>
-				
+
 				<div className="bg-white rounded-lg shadow-lg p-6 mb-6 border border-medium-grey/20">
 					<h2 className="text-xl font-poppins font-semibold mb-4 text-stellar">User Information</h2>
 					<div className="space-y-3 text-left">
@@ -106,11 +106,10 @@ export default async function ExperiencePage({
 						</div>
 						<div className="flex justify-between items-center">
 							<span className="font-inter font-medium text-dark-grey">Access Level:</span>
-							<span className={`px-3 py-1 rounded-full text-sm font-inter font-medium ${
-								authResult.accessLevel === 'admin' 
-									? 'bg-gold text-stellar' 
-									: 'bg-teal text-white'
-							}`}>
+							<span className={`px-3 py-1 rounded-full text-sm font-inter font-medium ${authResult.accessLevel === 'admin'
+								? 'bg-gold text-stellar'
+								: 'bg-teal text-white'
+								}`}>
 								{authResult.accessLevel}
 							</span>
 						</div>
