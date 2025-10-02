@@ -8,7 +8,7 @@ import { db } from '@/lib/db'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: { userId: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url)
@@ -28,7 +28,7 @@ export async function GET(
     const profile = await db.profile.findUnique({
       where: {
         userId_experienceId: {
-          userId: params.userId,
+          userId: context.params.userId,
           experienceId: experienceId,
         },
       },
@@ -60,7 +60,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: { userId: string } }
 ) {
   try {
     const body = await request.json()
@@ -79,7 +79,7 @@ export async function PATCH(
     const { auth } = authCheck
 
     // Verify the user is updating their own profile
-    if (auth.userId !== params.userId) {
+    if (auth.userId !== context.params.userId) {
       return ApiResponse.forbidden('You can only update your own profile')
     }
 
@@ -87,7 +87,7 @@ export async function PATCH(
     const profile = await db.profile.update({
       where: {
         userId_experienceId: {
-          userId: params.userId,
+          userId: context.params.userId,
           experienceId: experienceId,
         },
       },
