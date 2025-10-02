@@ -234,7 +234,7 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
                 <input
                   {...register('checkSizeMin', { valueAsNumber: true })}
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
                   placeholder="Min ($)"
                 />
                 {errors.checkSizeMin && (
@@ -245,7 +245,7 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
                 <input
                   {...register('checkSizeMax', { valueAsNumber: true })}
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
                   placeholder="Max ($)"
                 />
                 {errors.checkSizeMax && (
@@ -314,7 +314,7 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
           type="button"
           onClick={handleSaveDraft}
           disabled={isLoading}
-          className="w-full sm:w-auto mb-4 sm:mb-0 px-6 py-3 border border-medium-grey/30 text-dark-grey hover:text-stellar hover:border-stellar/30 rounded-xl font-inter font-medium transition-all duration-200 bg-white/50 backdrop-blur-sm"
+          className="w-full sm:w-auto mb-4 sm:mb-0 px-6 py-3 border border-neutral-300 text-neutral-700 hover:text-primary-600 hover:border-primary-300 rounded-xl font-inter font-medium transition-all duration-200 bg-white/50 backdrop-blur-sm"
         >
           {isDraft ? 'Saving Draft...' : 'Save Draft'}
         </button>
@@ -323,7 +323,7 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
           <button
             type="button"
             onClick={handlePreview}
-            className="flex-1 sm:flex-none px-6 py-3 border border-medium-grey/30 text-dark-grey hover:text-stellar hover:border-stellar/30 rounded-xl font-inter font-medium transition-all duration-200 bg-white/50 backdrop-blur-sm"
+            className="flex-1 sm:flex-none px-6 py-3 border border-neutral-300 text-neutral-700 hover:text-primary-600 hover:border-primary-300 rounded-xl font-inter font-medium transition-all duration-200 bg-white/50 backdrop-blur-sm"
           >
             Preview Profile
           </button>
