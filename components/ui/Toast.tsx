@@ -74,34 +74,62 @@ export function useToast() {
 
 function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: string) => void }) {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-3 max-w-md">
-      <AnimatePresence>
+    <div className="fixed top-6 right-6 z-50 space-y-3 max-w-md w-full px-4 sm:px-0">
+      <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (
           <motion.div
             key={toast.id}
-            initial={{ opacity: 0, y: -20, x: 100 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            transition={{ duration: 0.2 }}
-            className={`rounded-xl shadow-2xl p-4 border backdrop-blur-sm ${getToastStyles(toast.type)}`}
+            layout
+            initial={{ opacity: 0, y: -50, scale: 0.3 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{
+              opacity: 0,
+              scale: 0.5,
+              transition: { duration: 0.2 }
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 40
+            }}
+            className="relative"
           >
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                {getToastIcon(toast.type)}
+            <div className={`relative rounded-2xl shadow-hard overflow-hidden ${getToastStyles(toast.type)}`}>
+              {/* Animated Progress Bar */}
+              <motion.div
+                initial={{ scaleX: 1 }}
+                animate={{ scaleX: 0 }}
+                transition={{
+                  duration: (toast.duration || 5000) / 1000,
+                  ease: "linear"
+                }}
+                className={`absolute bottom-0 left-0 h-1 origin-left ${getProgressBarColor(toast.type)}`}
+              />
+
+              {/* Content */}
+              <div className="flex items-start gap-4 p-4">
+                {/* Icon with gradient background */}
+                <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${getIconBackground(toast.type)}`}>
+                  {getToastIcon(toast.type)}
+                </div>
+
+                {/* Message */}
+                <div className="flex-1 min-w-0 pt-1">
+                  <p className="text-sm font-body font-semibold text-neutral-900 leading-relaxed">
+                    {toast.message}
+                  </p>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => onRemove(toast.id)}
+                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-all duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-inter font-medium text-stellar">
-                  {toast.message}
-                </p>
-              </div>
-              <button
-                onClick={() => onRemove(toast.id)}
-                className="flex-shrink-0 text-dark-grey hover:text-stellar transition-colors duration-200"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
           </motion.div>
         ))}
@@ -113,13 +141,39 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
 function getToastStyles(type: ToastType): string {
   switch (type) {
     case 'success':
-      return 'bg-teal/10 border-teal/30 text-teal'
+      return 'glass-card border-secondary-200'
     case 'error':
-      return 'bg-red-50 border-red-200 text-red-700'
+      return 'glass-card border-red-200'
     case 'warning':
-      return 'bg-gold/10 border-gold/30 text-stellar'
+      return 'glass-card border-accent-200'
     case 'info':
-      return 'bg-stellar/5 border-stellar/20 text-stellar'
+      return 'glass-card border-primary-200'
+  }
+}
+
+function getIconBackground(type: ToastType): string {
+  switch (type) {
+    case 'success':
+      return 'bg-gradient-to-br from-secondary-400 to-secondary-600'
+    case 'error':
+      return 'bg-gradient-to-br from-red-400 to-red-600'
+    case 'warning':
+      return 'bg-gradient-to-br from-accent-400 to-accent-600'
+    case 'info':
+      return 'bg-gradient-to-br from-primary-400 to-primary-600'
+  }
+}
+
+function getProgressBarColor(type: ToastType): string {
+  switch (type) {
+    case 'success':
+      return 'bg-gradient-to-r from-secondary-400 to-secondary-600'
+    case 'error':
+      return 'bg-gradient-to-r from-red-400 to-red-600'
+    case 'warning':
+      return 'bg-gradient-to-r from-accent-400 to-accent-600'
+    case 'info':
+      return 'bg-gradient-to-r from-primary-400 to-primary-600'
   }
 }
 
@@ -127,26 +181,26 @@ function getToastIcon(type: ToastType) {
   switch (type) {
     case 'success':
       return (
-        <svg className="w-5 h-5 text-teal" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       )
     case 'error':
       return (
-        <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       )
     case 'warning':
       return (
-        <svg className="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
       )
     case 'info':
       return (
-        <svg className="w-5 h-5 text-stellar" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       )
   }
