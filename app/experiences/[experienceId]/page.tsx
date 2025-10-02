@@ -40,94 +40,84 @@ export default async function ExperiencePage({
 	// If no profile exists, show the beautiful welcome page
 	if (!profile) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-700 to-indigo-800">
-				{/* Header */}
-				<div className="border-b border-white/20 bg-black/50 backdrop-blur-sm">
-					<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-						<div className="flex items-center justify-between h-20">
-							<div className="flex items-center space-x-4">
-								<div className="w-12 h-12 bg-gradient-to-br from-white to-blue-300 rounded-2xl flex items-center justify-center shadow-lg">
-									<span className="text-blue-600 font-bold text-xl">T</span>
-								</div>
-								<h1 className="text-2xl font-bold text-white">T.UP</h1>
-							</div>
-							<div className="text-sm text-white/80">
-								Founder-Investor Matching
-							</div>
-						</div>
-					</div>
-				</div>
+			<div className="min-h-screen bg-white flex justify-center items-center px-6">
+				<div className="max-w-4xl mx-auto text-center">
 
-				{/* Main Content */}
-				<div className="flex items-center justify-center min-h-[80vh] px-4 sm:px-6 lg:px-8">
-					<div className="max-w-4xl w-full text-center">
-						{/* Star Icon */}
-						<div className="inline-block mb-8">
-							<div className="w-24 h-24 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-3xl flex items-center justify-center mx-auto shadow-2xl border-4 border-white/20">
-								<span className="text-4xl">⭐</span>
+					{/* Header */}
+					<header className="mb-16">
+						<div className="flex items-center justify-center mb-8">
+							<div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl">
+								<span className="text-white font-bold text-2xl">T</span>
 							</div>
+							<h1 className="text-4xl font-bold text-slate-900 ml-4">T.UP</h1>
+						</div>
+						<div className="text-slate-600 text-lg font-medium">Founder-Investor Matching Platform</div>
+					</header>
+
+					{/* Main Content */}
+					<main className="space-y-12">
+						{/* Hero Section */}
+						<div className="space-y-8">
+							<h2 className="text-6xl md:text-7xl font-bold text-slate-900 leading-tight">
+								Ready to Start <span className="text-slate-900 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Matching</span>?
+							</h2>
+							<p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+								Create your professional profile and get matched with verified partners in the startup ecosystem.
+							</p>
 						</div>
 
-						{/* Main Heading */}
-						<h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
-							Welcome to <span className="text-yellow-300">⭐ T.UP</span>
-						</h1>
+						{/* CTA Button */}
+						<div className="flex justify-center">
+							<a
+								href={`/experiences/${experienceId}/onboarding`}
+								className="inline-flex items-center px-12 py-4 bg-slate-900 hover:bg-slate-800 text-white text-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-slate-900"
+							>
+								<span>Get Started</span>
+								<svg className="ml-3 w-6 h-6" fill="none" stroke="white" strokeWidth={2} viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+								</svg>
+							</a>
+						</div>
 
-						{/* Subheading */}
-						<p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto mb-12 leading-relaxed drop-shadow-md font-medium">
-							Let's get you set up with a profile to start <span className="font-bold text-yellow-300">matching</span>
-						</p>
-
-						{/* Get Started Button */}
-						<a
-							href={`/experiences/${experienceId}/onboarding`}
-							className="inline-flex items-center px-12 py-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xl font-bold rounded-2xl shadow-2xl hover:shadow-yellow-400/50 transition-all duration-300 hover:scale-105 border-4 border-white/20"
-						>
-							<span>Get Started</span>
-							<svg className="ml-3 w-6 h-6" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-							</svg>
-						</a>
-
-						{/* Feature Grid */}
-						<div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-							<div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border-2 border-white/30">
-								<div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+						{/* Features Grid */}
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
+							<div className="bg-slate-50 rounded-xl p-8 border border-slate-200 hover:border-slate-300 transition-colors duration-300">
+								<div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
 										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
 									</svg>
 								</div>
-								<h3 className="text-lg font-bold text-gray-900 mb-2">Fast Matching</h3>
-								<p className="text-gray-700 font-medium">Connect with the perfect founder or investor in minutes</p>
+								<h3 className="text-xl font-bold text-slate-900 mb-3">Fast Matching</h3>
+								<p className="text-slate-600 leading-relaxed">Smart algorithm connects you with relevant partners within minutes of setup.</p>
 							</div>
 
-							<div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border-2 border-white/30">
-								<div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+							<div className="bg-slate-50 rounded-xl p-8 border border-slate-200 hover:border-slate-300 transition-colors duration-300">
+								<div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
 										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 									</svg>
 								</div>
-								<h3 className="text-lg font-bold text-gray-900 mb-2">Verified Partners</h3>
-								<p className="text-gray-700 font-medium">All profiles are verified for quality and authenticity</p>
+								<h3 className="text-xl font-bold text-slate-900 mb-3">Verified Partners</h3>
+								<p className="text-slate-600 leading-relaxed">All profiles undergo verification for quality and legitimacy in the ecosystem.</p>
 							</div>
 
-							<div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border-2 border-white/30">
-								<div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+							<div className="bg-slate-50 rounded-xl p-8 border border-slate-200 hover:border-slate-300 transition-colors duration-300">
+								<div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
 										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
 									</svg>
 								</div>
-								<h3 className="text-lg font-bold text-gray-900 mb-2">Smart Algorithm</h3>
-								<p className="text-gray-700 font-medium">AI-powered matching for better startup-investor fit</p>
+								<h3 className="text-xl font-bold text-slate-900 mb-3">Smart Algorithm</h3>
+								<p className="text-slate-600 leading-relaxed">AI-powered matching considers multiple factors for the perfect partnership.</p>
 							</div>
 						</div>
-					</div>
-				</div>
+					</main>
 
-				{/* Footer */}
-				<footer className="text-center py-8 text-white/80 text-sm">
-					<p>© 2024 T.UP. Connecting founders and investors globally.</p>
-				</footer>
+					{/* Footer */}
+					<footer className="mt-20 pt-8 border-t border-slate-200">
+						<p className="text-slate-500 text-sm">© 2024 T.UP. Connecting founders and investors globally.</p>
+					</footer>
+				</div>
 			</div>
 		);
 	}
