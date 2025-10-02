@@ -71,7 +71,7 @@ model Thread {
   lastMessageAt DateTime @default(now()) @map("last_message_at")
 
   // Relations
-  match    Match     @relation
+  match    Match?    @relation
   messages Message[]
 
   @@map("threads")
