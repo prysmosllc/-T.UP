@@ -146,3 +146,32 @@ export function createAuthErrorResponse(authError: AuthError) {
     }
   )
 }
+
+/**
+ * Extract user information from middleware headers
+ * Use this in API routes and server components to get authenticated user info
+ */
+export function getUserFromHeaders(headers: Headers): AuthResult | null {
+  const userId = headers.get('x-user-id')
+  const accessLevel = headers.get('x-access-level') as AccessLevel
+  const hasAccess = headers.get('x-has-access') === 'true'
+  const experienceId = headers.get('x-experience-id')
+
+  if (!userId || !accessLevel || !experienceId) {
+    return null
+  }
+
+  return {
+    userId,
+    hasAccess,
+    accessLevel,
+  }
+}
+
+/**
+ * Get user information from Next.js request headers
+ * Convenience function for API routes
+ */
+export function getUserFromRequest(request: NextRequest): AuthResult | null {
+  return getUserFromHeaders(request.headers)
+}

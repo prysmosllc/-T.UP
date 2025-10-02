@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyUserAccess, createAuthErrorResponse, requireAccess, requireAdmin, type AuthResult } from './auth'
+import { verifyUserAccess, createAuthErrorResponse, requireAccess, requireAdmin, getUserFromRequest, type AuthResult } from './auth'
 
 /**
  * Helper function to handle authentication in API routes
  * Use this in your API route handlers for consistent auth handling
+ * This function first tries to use middleware headers for better performance,
+ * falling back to full auth verification if needed
  */
 export async function handleAuth(
   request: NextRequest,
@@ -13,15 +15,22 @@ export async function handleAuth(
   } = {}
 ): Promise<{ success: true; auth: AuthResult } | { success: false; response: NextResponse }> {
   try {
-    // Verify user authentication and access
-    const authResult = await verifyUserAccess(request, experienceId)
+    // First try to get auth info from middleware headers (more efficient)
+    let authResult = getUserFromRequest(request)
 
-    // Check for authentication errors
-    if ('error' in authResult) {
-      return {
-        success: false,
-        response: createAuthErrorResponse(authResult)
+    // If middleware headers are not available, perform full auth verification
+    if (!authResult) {
+      const fullAuthResult = await verifyUserAccess(request, experienceId)
+      
+      // Check for authentication errors
+      if ('error' in fullAuthResult) {
+        return {
+          success: false,
+          response: createAuthErrorResponse(fullAuthResult)
+        }
       }
+      
+      authResult = fullAuthResult
     }
 
     // Check access requirements

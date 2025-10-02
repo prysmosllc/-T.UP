@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyUserAccess, createAuthErrorResponse, requireAccess } from '@/lib/auth'
+import { handleAuth, ApiResponse, validateRequiredFields } from '@/lib/api-utils'
 import { db } from '@/lib/db'
 import { Role } from '@prisma/client'
 import { z } from 'zod'
@@ -22,28 +22,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createProfileSchema.parse(body)
 
-    // Verify user authentication and access
-    const authResult = await verifyUserAccess(request, validatedData.experienceId)
-
-    // Check for authentication errors
-    if ('error' in authResult) {
-      return createAuthErrorResponse(authResult)
+    // Handle authentication using middleware or direct verification
+    const authCheck = await handleAuth(request, validatedData.experienceId)
+    if (!authCheck.success) {
+      return authCheck.response
     }
 
-    // Check access requirements
-    if (!requireAccess(authResult)) {
-      return NextResponse.json(
-        { error: 'Access denied to this experience' },
-        { status: 403 }
-      )
-    }
+    const { auth } = authCheck
 
     // Verify the user is creating their own profile
-    if (authResult.userId !== validatedData.userId) {
-      return NextResponse.json(
-        { error: 'You can only create your own profile' },
-        { status: 403 }
-      )
+    if (auth.userId !== validatedData.userId) {
+      return ApiResponse.forbidden('You can only create your own profile')
     }
 
     // Create or update the profile
@@ -69,31 +58,19 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: profile.id,
-        role: profile.role,
-        isComplete: profile.isComplete,
-        message: validatedData.isComplete ? 'Profile created successfully!' : 'Profile saved as draft'
-      },
+    return ApiResponse.success({
+      id: profile.id,
+      role: profile.role,
+      isComplete: profile.isComplete,
+      message: validatedData.isComplete ? 'Profile created successfully!' : 'Profile saved as draft'
     })
   } catch (error) {
     console.error('Profile creation error:', error)
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { 
-          error: 'Invalid profile data',
-          details: error.issues 
-        },
-        { status: 400 }
-      )
+      return ApiResponse.error('Invalid profile data', 400, error.issues)
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return ApiResponse.error('Internal server error', 500)
   }
 }

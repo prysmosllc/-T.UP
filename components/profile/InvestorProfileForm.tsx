@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { ProfilePreview } from './ProfilePreview'
+import { useToast } from '@/components/ui/Toast'
+import { Role } from '@prisma/client'
+import type { InvestorProfileData } from '@/lib/types'
 
 const investorSchema = z.object({
   sectors: z.array(z.string()).min(1, 'Please select at least one sector'),
@@ -15,6 +19,9 @@ const investorSchema = z.object({
   introNote: z.string().min(50, 'Introduction must be at least 50 characters').max(500, 'Introduction must be less than 500 characters'),
   portfolioLinks: z.string().optional(),
   theses: z.string().optional(),
+}).refine((data) => data.checkSizeMax >= data.checkSizeMin, {
+  message: 'Maximum check size must be greater than or equal to minimum check size',
+  path: ['checkSizeMax'],
 })
 
 type InvestorFormData = z.infer<typeof investorSchema>
@@ -41,7 +48,9 @@ const geographies = [
 export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const router = useRouter()
+  const toast = useToast()
 
   const {
     register,
@@ -98,16 +107,20 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
 
       if (response.ok) {
         if (saveAsDraft) {
-          alert('Profile saved as draft!')
+          toast.success('Profile saved as draft!')
         } else {
-          router.push(`/experiences/${experienceId}/discovery`)
+          toast.success('Profile created successfully!')
+          setTimeout(() => {
+            router.push(`/experiences/${experienceId}/discovery`)
+          }, 1000)
         }
       } else {
-        throw new Error('Failed to save profile')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to save profile')
       }
     } catch (error) {
       console.error('Error saving profile:', error)
-      alert('Error saving profile. Please try again.')
+      toast.error(error instanceof Error ? error.message : 'Error saving profile. Please try again.')
     } finally {
       setIsLoading(false)
       setIsDraft(false)
@@ -118,8 +131,18 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
     handleSubmit((data) => onSubmit(data, true))()
   }
 
+  const handlePreview = () => {
+    const values = getValues()
+    if (!values.sectors || values.sectors.length === 0 || !values.introNote) {
+      toast.warning('Please fill in at least the sectors and introduction to preview')
+      return
+    }
+    setShowPreview(true)
+  }
+
   return (
-    <form onSubmit={handleSubmit((data) => onSubmit(data, false))} className="p-8">
+    <>
+      <form onSubmit={handleSubmit((data) => onSubmit(data, false))} className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column */}
         <div className="space-y-6">
@@ -299,6 +322,7 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
         <div className="flex space-x-4 w-full sm:w-auto">
           <button
             type="button"
+            onClick={handlePreview}
             className="flex-1 sm:flex-none px-6 py-3 border border-medium-grey/30 text-dark-grey hover:text-stellar hover:border-stellar/30 rounded-xl font-inter font-medium transition-all duration-200 bg-white/50 backdrop-blur-sm"
           >
             Preview Profile
@@ -317,5 +341,26 @@ export function InvestorProfileForm({ userId, experienceId }: InvestorProfileFor
         </div>
       </div>
     </form>
+
+    {/* Profile Preview Modal */}
+    {showPreview && (
+      <ProfilePreview
+        role={Role.INVESTOR}
+        data={{
+          sectors: watchedValues.sectors || [],
+          checkSize: {
+            min: watchedValues.checkSizeMin || 0,
+            max: watchedValues.checkSizeMax || 0
+          },
+          stages: watchedValues.stages || [],
+          geography: watchedValues.geography || [],
+          introNote: watchedValues.introNote || '',
+          portfolioLinks: watchedValues.portfolioLinks ? watchedValues.portfolioLinks.split('\n').filter(link => link.trim()) : [],
+          theses: watchedValues.theses
+        } as InvestorProfileData}
+        onClose={() => setShowPreview(false)}
+      />
+    )}
+  </>
   )
 }

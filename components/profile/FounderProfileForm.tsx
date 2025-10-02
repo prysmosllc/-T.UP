@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { FileUpload } from '@/components/ui/FileUpload'
+import { ProfilePreview } from './ProfilePreview'
+import { useToast } from '@/components/ui/Toast'
+import { Role } from '@prisma/client'
+import type { FounderProfileData } from '@/lib/types'
 
 const founderSchema = z.object({
   startupName: z.string().min(2, 'Startup name must be at least 2 characters'),
@@ -17,6 +22,9 @@ const founderSchema = z.object({
   location: z.string().min(2, 'Location is required'),
   teamSize: z.number().optional(),
   tractionMetrics: z.string().optional(),
+}).refine((data) => data.fundingAskMax >= data.fundingAskMin, {
+  message: 'Maximum funding must be greater than or equal to minimum funding',
+  path: ['fundingAskMax'],
 })
 
 type FounderFormData = z.infer<typeof founderSchema>
@@ -41,13 +49,18 @@ const stages = [
 export function FounderProfileForm({ userId, experienceId }: FounderProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
+  const [pitchDeckUrl, setPitchDeckUrl] = useState<string>('')
+  const [pitchDeckName, setPitchDeckName] = useState<string>('')
+  const [showPreview, setShowPreview] = useState(false)
   const router = useRouter()
+  const toast = useToast()
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors, isValid }
   } = useForm<FounderFormData>({
     resolver: zodResolver(founderSchema),
@@ -75,7 +88,8 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
             fundingAsk: {
               min: data.fundingAskMin,
               max: data.fundingAskMax
-            }
+            },
+            pitchDeckUrl: pitchDeckUrl || undefined
           },
           isComplete: !saveAsDraft
         }),
@@ -84,17 +98,21 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
       if (response.ok) {
         if (saveAsDraft) {
           // Show success message for draft
-          alert('Profile saved as draft!')
+          toast.success('Profile saved as draft!')
         } else {
           // Navigate to discovery
-          router.push(`/experiences/${experienceId}/discovery`)
+          toast.success('Profile created successfully!')
+          setTimeout(() => {
+            router.push(`/experiences/${experienceId}/discovery`)
+          }, 1000)
         }
       } else {
-        throw new Error('Failed to save profile')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to save profile')
       }
     } catch (error) {
       console.error('Error saving profile:', error)
-      alert('Error saving profile. Please try again.')
+      toast.error(error instanceof Error ? error.message : 'Error saving profile. Please try again.')
     } finally {
       setIsLoading(false)
       setIsDraft(false)
@@ -105,8 +123,43 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
     handleSubmit((data) => onSubmit(data, true))()
   }
 
+  const handleFileUpload = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch(`/api/upload?experienceId=${experienceId}`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || 'Upload failed')
+    }
+
+    const result = await response.json()
+    setPitchDeckUrl(result.data.url)
+    setPitchDeckName(result.data.filename)
+    return result.data.url
+  }
+
+  const handleFileRemove = () => {
+    setPitchDeckUrl('')
+    setPitchDeckName('')
+  }
+
+  const handlePreview = () => {
+    const values = getValues()
+    if (!values.startupName || !values.industry) {
+      toast.warning('Please fill in at least the startup name and industry to preview')
+      return
+    }
+    setShowPreview(true)
+  }
+
   return (
-    <form onSubmit={handleSubmit((data) => onSubmit(data, false))} className="p-8">
+    <>
+      <form onSubmit={handleSubmit((data) => onSubmit(data, false))} className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column */}
         <div className="space-y-6">
@@ -287,6 +340,17 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
               placeholder="Revenue, users, growth rate, partnerships, etc."
             />
           </div>
+
+          {/* Pitch Deck Upload */}
+          <FileUpload
+            onFileUpload={handleFileUpload}
+            onFileRemove={handleFileRemove}
+            currentFileUrl={pitchDeckUrl}
+            currentFileName={pitchDeckName}
+            label="Pitch Deck"
+            description="Upload your pitch deck to give investors a comprehensive view of your startup"
+            disabled={isLoading}
+          />
         </div>
       </div>
 
@@ -304,6 +368,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
         <div className="flex space-x-4 w-full sm:w-auto">
           <button
             type="button"
+            onClick={handlePreview}
             className="flex-1 sm:flex-none px-6 py-3 border border-medium-grey/30 text-dark-grey hover:text-stellar hover:border-stellar/30 rounded-xl font-inter font-medium transition-all duration-200 bg-white/50 backdrop-blur-sm"
           >
             Preview Profile
@@ -322,5 +387,29 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
         </div>
       </div>
     </form>
+
+    {/* Profile Preview Modal */}
+    {showPreview && (
+      <ProfilePreview
+        role={Role.FOUNDER}
+        data={{
+          startupName: watchedValues.startupName || '',
+          industry: watchedValues.industry || '',
+          stage: watchedValues.stage as 'idea' | 'mvp' | 'pmf',
+          fundingAsk: {
+            min: watchedValues.fundingAskMin || 0,
+            max: watchedValues.fundingAskMax || 0
+          },
+          briefPitch: watchedValues.briefPitch || '',
+          website: watchedValues.website || '',
+          location: watchedValues.location || '',
+          teamSize: watchedValues.teamSize,
+          tractionMetrics: watchedValues.tractionMetrics,
+          pitchDeckUrl: pitchDeckUrl || undefined
+        } as FounderProfileData}
+        onClose={() => setShowPreview(false)}
+      />
+    )}
+  </>
   )
 }

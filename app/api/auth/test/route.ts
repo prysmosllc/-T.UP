@@ -1,55 +1,76 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyUserAccess, createAuthErrorResponse, requireAccess } from '@/lib/auth'
+import { NextRequest } from 'next/server'
+import { handleAuth, ApiResponse } from '@/lib/api-utils'
 
 /**
- * Test authentication endpoint
- * GET /api/auth/test?experienceId=exp_xxx
+ * Test endpoint to verify authentication middleware is working
+ * GET /api/auth/test?experienceId=<experienceId>
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get experienceId from query parameters
     const { searchParams } = new URL(request.url)
     const experienceId = searchParams.get('experienceId')
 
     if (!experienceId) {
-      return NextResponse.json(
-        { error: 'experienceId query parameter is required' },
-        { status: 400 }
-      )
+      return ApiResponse.error('experienceId parameter is required', 400)
     }
 
-    // Verify user authentication and access
-    const authResult = await verifyUserAccess(request, experienceId)
-
-    // Check for authentication errors
-    if ('error' in authResult) {
-      return createAuthErrorResponse(authResult)
+    // Test authentication using the middleware
+    const authCheck = await handleAuth(request, experienceId)
+    if (!authCheck.success) {
+      return authCheck.response
     }
 
-    // Check access requirements
-    if (!requireAccess(authResult)) {
-      return NextResponse.json(
-        { error: 'Access denied to this experience' },
-        { status: 403 }
-      )
-    }
+    const { auth } = authCheck
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        message: 'Authentication successful',
-        user: {
-          userId: authResult.userId,
-          hasAccess: authResult.hasAccess,
-          accessLevel: authResult.accessLevel,
-        },
+    return ApiResponse.success({
+      message: 'Authentication successful',
+      user: {
+        userId: auth.userId,
+        accessLevel: auth.accessLevel,
+        hasAccess: auth.hasAccess,
       },
+      experienceId,
+      timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('API route error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Auth test error:', error)
+    return ApiResponse.error('Internal server error', 500)
+  }
+}
+
+/**
+ * Test endpoint to verify admin authentication
+ * POST /api/auth/test?experienceId=<experienceId>
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const experienceId = searchParams.get('experienceId')
+
+    if (!experienceId) {
+      return ApiResponse.error('experienceId parameter is required', 400)
+    }
+
+    // Test admin authentication
+    const authCheck = await handleAuth(request, experienceId, { requireAdmin: true })
+    if (!authCheck.success) {
+      return authCheck.response
+    }
+
+    const { auth } = authCheck
+
+    return ApiResponse.success({
+      message: 'Admin authentication successful',
+      user: {
+        userId: auth.userId,
+        accessLevel: auth.accessLevel,
+        hasAccess: auth.hasAccess,
+      },
+      experienceId,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error) {
+    console.error('Admin auth test error:', error)
+    return ApiResponse.error('Internal server error', 500)
   }
 }
