@@ -170,7 +170,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
             </label>
             <input
               {...register('startupName')}
-              className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
               placeholder="Enter your startup name"
             />
             {errors.startupName && (
@@ -185,7 +185,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
             </label>
             <select
               {...register('industry')}
-              className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900"
             >
               <option value="">Select an industry</option>
               {industries.map((industry) => (
@@ -235,8 +235,8 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
             <input
               {...register('website')}
               type="url"
-              className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
-              placeholder="https://yourstartu.com"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
+              placeholder="https://yourstartup.com"
             />
             {errors.website && (
               <p className="mt-1 text-sm text-red-500 font-inter">{errors.website.message}</p>
@@ -250,7 +250,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
             </label>
             <input
               {...register('location')}
-              className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
               placeholder="San Francisco, CA"
             />
             {errors.location && (
@@ -271,7 +271,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
                 <input
                   {...register('fundingAskMin', { valueAsNumber: true })}
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
                   placeholder="Min ($)"
                 />
                 {errors.fundingAskMin && (
@@ -282,7 +282,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
                 <input
                   {...register('fundingAskMax', { valueAsNumber: true })}
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
                   placeholder="Max ($)"
                 />
                 {errors.fundingAskMax && (
@@ -300,7 +300,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
             <textarea
               {...register('briefPitch')}
               rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500 resize-none"
               placeholder="Describe your startup in 2-3 sentences. What problem do you solve and how?"
             />
             <div className="flex justify-between mt-1">
@@ -323,7 +323,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
               {...register('teamSize', { valueAsNumber: true })}
               type="number"
               min="1"
-              className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500"
               placeholder="Number of team members"
             />
           </div>
@@ -336,7 +336,7 @@ export function FounderProfileForm({ userId, experienceId }: FounderProfileFormP
             <textarea
               {...register('tractionMetrics')}
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-medium-grey/30 focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all duration-200 font-inter bg-white/50 backdrop-blur-sm resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 font-inter bg-white text-neutral-900 placeholder-neutral-500 resize-none"
               placeholder="Revenue, users, growth rate, partnerships, etc."
             />
           </div>
