@@ -28,7 +28,7 @@ export function ProfileCreation({ userId, experienceId, role }: ProfileCreationP
         const formData = new FormData()
         formData.append('file', data.pitchDeckUrl as File)
 
-        const uploadResponse = await fetch('/api/upload', {
+        const uploadResponse = await fetch(`/api/upload?experienceId=${experienceId}`, {
           method: 'POST',
           body: formData,
         })
@@ -54,6 +54,7 @@ export function ProfileCreation({ userId, experienceId, role }: ProfileCreationP
         body: JSON.stringify({
           userId,
           experienceId,
+          role: role === Role.FOUNDER ? 'FOUNDER' : 'INVESTOR', // Convert enum to string
           data: profileData,
         }),
       })
