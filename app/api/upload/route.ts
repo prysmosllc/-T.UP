@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyUserAccess, createAuthErrorResponse, requireAccess } from '@/lib/auth'
-import { whopSdk } from '@/lib/whop-sdk'
+import { put } from '@vercel/blob'
 
 /**
  * Upload file using Whop's Upload media feature
@@ -69,25 +69,24 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Convert File to Buffer for Whop SDK
+      // Convert File to Buffer for Vercel Blob
       const arrayBuffer = await file.arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
 
-      // Upload using Whop SDK Upload Media feature
-      const uploadedFile = await whopSdk.media.uploadMedia({
-        file: buffer,
-        filename: file.name,
+      // Upload using Vercel Blob storage
+      const blob = await put(file.name, buffer, {
+        access: 'public',
         contentType: file.type,
       })
 
-      if (!uploadedFile || !uploadedFile.url) {
+      if (!blob || !blob.url) {
         throw new Error('Upload failed: No URL returned')
       }
 
       return NextResponse.json({
         success: true,
         data: {
-          url: uploadedFile.url,
+          url: blob.url,
           filename: file.name,
           size: file.size,
           type: file.type,
