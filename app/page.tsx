@@ -8,8 +8,9 @@ export default function Page() {
   const router = useRouter()
 
   const handleGetStarted = () => {
-    // Navigate to the main experience onboarding
-    router.push('/experiences/demo/onboarding')
+    // Navigate to a default experience for onboarding
+    // In production, this would come from URL or user selection
+    router.push('/experiences/default/onboarding')
   }
 
   return (
