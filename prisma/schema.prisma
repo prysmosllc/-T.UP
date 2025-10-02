@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  experienceId String   @map("experience_id")
+  role         Role
+  isComplete   Boolean  @default(false) @map("is_complete")
+  data         Json     // Role-specific profile data
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  sentInteractions     Interaction[] @relation("SentInteractions")
+  receivedInteractions Interaction[] @relation("ReceivedInteractions")
+  matches1             Match[]       @relation("User1Matches")
+  matches2             Match[]       @relation("User2Matches")
+  sentReports          Report[]      @relation("SentReports")
+  receivedReports      Report[]      @relation("ReceivedReports")
+
+  @@unique([userId, experienceId])
+  @@map("profiles")
+}
+
+model Interaction {
+  id           String      @id @default(cuid())
+  fromUserId   String      @map("from_user_id")
+  toUserId     String      @map("to_user_id")
+  experienceId String      @map("experience_id")
+  action       ActionType
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  fromProfile Profile @relation("SentInteractions", fields: [fromUserId, experienceId], references: [userId, experienceId])
+  toProfile   Profile @relation("ReceivedInteractions", fields: [toUserId, experienceId], references: [userId, experienceId])
+
+  @@unique([fromUserId, toUserId, experienceId])
+  @@map("interactions")
+}
+
+model Match {
+  id           String   @id @default(cuid())
+  user1Id      String   @map("user1_id")
+  user2Id      String   @map("user2_id")
+  experienceId String   @map("experience_id")
+  threadId     String   @unique @map("thread_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user1Profile Profile @relation("User1Matches", fields: [user1Id, experienceId], references: [userId, experienceId])
+  user2Profile Profile @relation("User2Matches", fields: [user2Id, experienceId], references: [userId, experienceId])
+  thread       Thread  @relation(fields: [threadId], references: [id])
+
+  @@unique([user1Id, user2Id, experienceId])
+  @@map("matches")
+}
+
+model Thread {
+  id            String   @id @default(cuid())
+  matchId       String   @unique @map("match_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  lastMessageAt DateTime @default(now()) @map("last_message_at")
+
+  // Relations
+  match    Match     @relation(fields: [matchId], references: [id])
+  messages Message[]
+
+  @@map("threads")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  threadId    String   @map("thread_id")
+  senderId    String   @map("sender_id")
+  content     String
+  attachments Json     @default("[]")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  thread Thread @relation(fields: [threadId], references: [id])
+
+  @@map("messages")
+}
+
+model Report {
+  id               String       @id @default(cuid())
+  reporterId       String       @map("reporter_id")
+  reportedUserId   String       @map("reported_user_id")
+  experienceId     String       @map("experience_id")
+  reason           String
+  description      String?
+  status           ReportStatus @default(PENDING)
+  createdAt        DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  reporterProfile Profile @relation("SentReports", fields: [reporterId, experienceId], references: [userId, experienceId])
+  reportedProfile Profile @relation("ReceivedReports", fields: [reportedUserId, experienceId], references: [userId, experienceId])
+
+  @@map("reports")
+}
+
+enum Role {
+  FOUNDER
+  INVESTOR
+}
+
+enum ActionType {
+  LIKE
+  PASS
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
